@@ -1,0 +1,25 @@
+name: Upload generated.zip to Release
+
+on:
+  workflow_dispatch:   # 手动触发
+  schedule:
+    - cron: "0 0 * * 0"  # 每周日 00:00 UTC 自动同步（可选）
+
+jobs:
+  upload:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download generated.zip
+        run: |
+          # 把下面地址换成你能访问到的真实地址
+          wget -q "http://120.220.48.82:23333/generated.zip" -O generated.zip
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ia_latest
+          name: "ItemsAdder Resource Pack"
+          body: "自动同步生成"
+          files: generated.zip
+          token: ${{ secrets.GITHUB_TOKEN }}

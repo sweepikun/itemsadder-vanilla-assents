@@ -23,18 +23,30 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x ./gradlew
 
-      - name: Build with Gradle Wrapper (uses project-defined Gradle version)
+      - name: Build with Gradle Wrapper
         run: ./gradlew clean build
 
-      - name: Find JAR
+      - name: Find built JAR file (anywhere in project)
         id: find-jar
         run: |
-          JAR_FILE=$(find build/libs -type f -name "*.jar" | head -n 1)
-          if [ -z "$JAR_FILE" ]; then
-            echo "❌ No JAR found!"
-            ls -la build/libs/ || true
+          JAR_FILE=$(find . -name "*.jar" \
+            -not -name "*-sources.jar" \
+            -not -name "*-javadoc.jar" \
+            -not -name "*-dev.jar" \
+            -not -name "empty*.jar" \
+            -type f | \
+            xargs ls -lS 2>/dev/null | \
+            head -n 1 | \
+            awk '{print $NF}')
+
+          if [ -z "$JAR_FILE" ] || [ ! -f "$JAR_FILE" ]; then
+            echo "❌ No suitable JAR found!"
+            echo "All JAR files in project:"
+            find . -name "*.jar" -type f -exec ls -la {} + || echo "None."
             exit 1
           fi
+
+          echo "Found JAR: $JAR_FILE"
           echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
 
       - name: Create Release

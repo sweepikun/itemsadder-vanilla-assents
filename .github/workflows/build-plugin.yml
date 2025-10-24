@@ -1,7 +1,7 @@
 name: Build and Release Adyeshach
 
 on:
-  workflow_dispatch:  # 允许手动触发
+  workflow_dispatch:  # 手动触发
 
 jobs:
   build-and-release:
@@ -17,18 +17,16 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Grant execute permission to gradlew
-        run: chmod +x ./gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew clean build
+      - name: Build with system Gradle
+        run: gradle clean build
 
       - name: Find built JAR file
         id: find-jar
         run: |
           JAR_FILE=$(find build/libs -type f -name "*.jar" | head -n 1)
           if [ -z "$JAR_FILE" ]; then
-            echo "No JAR file found!"
+            echo "No JAR file found in build/libs!"
+            ls -R build/ || true
             exit 1
           fi
           echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
@@ -37,7 +35,7 @@ jobs:
       - name: Create Release and Upload Asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: adyeshach  # 使用插件名作为 tag
+          tag_name: adyeshach
           name: Release adyeshach
           draft: false
           prerelease: false

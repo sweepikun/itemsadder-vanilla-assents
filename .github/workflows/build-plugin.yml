@@ -1,4 +1,4 @@
-name: Build and Release Adyeshach (2.1) to My Repo
+name: Build and Release Adyeshach (2.1)
 
 on:
   workflow_dispatch:
@@ -8,13 +8,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout THIS repository (for release permission)
+      - name: Checkout this repository (for release)
         uses: actions/checkout@v4
-        with:
-          # 不检出 adyeshach，只保留当前仓库用于发布
-          # 我们会单独 clone adyeshach 源码来构建
 
-      - name: Clone TabooLib/adyeshach @ 2.1
+      - name: Clone Adyeshach source (2.1 branch)
         run: |
           git clone --branch 2.1 --depth 1 https://github.com/TabooLib/adyeshach.git adyeshach-source
 
@@ -27,7 +24,7 @@ jobs:
       - name: Grant execute permission to gradlew
         run: chmod +x adyeshach-source/gradlew
 
-      - name: Build with Gradle Wrapper
+      - name: Build plugin
         working-directory: adyeshach-source
         run: ./gradlew clean build
 
@@ -50,15 +47,14 @@ jobs:
             exit 1
           fi
 
-          echo "Found JAR: $JAR_FILE"
           echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
 
-      - name: Create Release in THIS repository
+      - name: Create Release in this repository
         uses: softprops/action-gh-release@v2
         with:
           tag_name: adyeshach-2.1
           name: Adyeshach 2.1 (Auto Build)
-          body: "Auto-built from https://github.com/TabooLib/adyeshach/tree/2.1"
+          body: "Built from https://github.com/TabooLib/adyeshach/tree/2.1"
           files: ${{ steps.find-jar.outputs.jar_path }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # ✅ 有权限操作当前仓库
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,4 +1,4 @@
-name: Build and Release Adyeshach
+name: Build and Release Adyeshach (2.1)
 
 on:
   workflow_dispatch:
@@ -8,30 +8,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Adyeshach (XiaoJie-150 branch)
+      - name: Checkout TabooLib/adyeshach @ 2.1
         uses: actions/checkout@v4
         with:
           repository: TabooLib/adyeshach
-          ref: XiaoJie-150
-          path: adyeshach  # 检出到 adyeshach/ 子目录
+          ref: 2.1  # ← 这次是真正的分支名！
 
-      - name: Set up JDK 17
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
-      - name: Build from 1.21 subdirectory
-        working-directory: adyeshach/1.21
+      - name: Build plugin
         run: gradle clean build
 
-      - name: Find built JAR file
+      - name: Find JAR file
         id: find-jar
         run: |
-          JAR_FILE=$(find adyeshach/1.21/build/libs -type f -name "*.jar" | head -n 1)
+          JAR_FILE=$(find build/libs -type f -name "*.jar" | head -n 1)
           if [ -z "$JAR_FILE" ]; then
-            echo "No JAR found!"
-            ls -R adyeshach/1.21/build/ || true
+            echo "❌ No JAR found!"
+            ls -la build/libs/ || true
             exit 1
           fi
           echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
@@ -39,7 +37,8 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: adyeshach
+          tag_name: adyeshach-2.1
+          name: Adyeshach 2.1 (Auto Build)
           files: ${{ steps.find-jar.outputs.jar_path }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

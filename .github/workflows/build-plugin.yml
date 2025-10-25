@@ -8,19 +8,23 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout this repository (for release)
+      # 1️⃣ 必须先 checkout 自己的仓库（保持上下文）
+      - name: Checkout this repository
         uses: actions/checkout@v4
 
+      # 2️⃣ 单独 clone 源码用于构建（不影响上下文）
       - name: Clone Adyeshach source (2.1 branch)
         run: |
           git clone --branch 2.1 --depth 1 https://github.com/TabooLib/adyeshach.git adyeshach-source
 
+      # 3️⃣ 设置 JDK 21（按你要求）
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
 
+      # 4️⃣ 构建
       - name: Grant execute permission to gradlew
         run: chmod +x adyeshach-source/gradlew
 
@@ -28,6 +32,7 @@ jobs:
         working-directory: adyeshach-source
         run: ./gradlew clean build
 
+      # 5️⃣ 找 JAR
       - name: Find built JAR file
         id: find-jar
         run: |
@@ -49,7 +54,8 @@ jobs:
 
           echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
 
-      - name: Create Release in this repository
+      # 6️⃣ 发布到 **当前仓库**（因为第一步 checkout 的是自己）
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: adyeshach-2.1

@@ -1,0 +1,70 @@
+name: Recover & Release Code from Web Archive
+
+on:
+  workflow_dispatch: # 手动触发（推荐）
+  # 可选自动触发
+  # push:
+  #   branches: [ main ]
+
+jobs:
+  recover-and-release:
+    name: Download, Tag & Release from Web Archive
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # 允许创建 tag 和 release
+      packages: read   # 如需发布包
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set current date as version
+        id: version
+        run: echo "DATE=$(date +'%Y%m%d-%H%M%S')" >> $GITHUB_ENV
+
+      - name: Download ZIP from Internet Archive
+        run: |
+          URL="https://web.archive.org/web/20250801033826im_/https://hksgit.plauncher.cn/jspl/core/archive/develop.zip"
+          OUTPUT="jspl-core-recovered-$ENV_DATE.zip"
+
+          echo "📥 Downloading from: $URL"
+          wget --user-agent="Mozilla/5.0 (X11; Linux x86_64)" \
+               --timeout=60 \
+               --tries=5 \
+               --no-check-certificate \
+               -O "$OUTPUT" "$URL"
+
+          if [ ! -f "$OUTPUT" ] || [ ! -s "$OUTPUT" ]; then
+            echo "❌ Failed to download or empty file!"
+            exit 1
+          fi
+          echo "✅ Successfully downloaded: $OUTPUT"
+
+          # 导出为后续步骤使用
+          echo "ZIP_FILE=$OUTPUT" >> $GITHUB_ENV
+          echo "TAG_NAME=jspl-core-v$ENV_DATE" >> $GITHUB_ENV
+
+      - name: Create Git Tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          git tag "${{ env.TAG_NAME }}" -m "Recovered code from web.archive.org - Snapshot: 2025-08-01"
+          git push origin "${{ env.TAG_NAME }}"
+          echo "✅ Created and pushed tag: ${{ env.TAG_NAME }}"
+
+      - name: Create Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.REPO_PAT }}  # 使用具有写权限的 PAT
+        run: |
+          gh release create "${{ env.TAG_NAME }}" \
+            --title "Recovered: JSPL Core (Web Archive Snapshot)" \
+            --notes "Recovered source code from Internet Archive snapshot on 2025-08-01.\n\n🔗 Source: https://web.archive.org/web/20250801033826/https://hksgit.plauncher.cn/jspl/core/archive/develop.zip" \
+            --draft=false \
+            --prerelease=false \
+            "./${{ env.ZIP_FILE }}"
+
+          echo "🎉 Release published: ${{ env.TAG_NAME }}"

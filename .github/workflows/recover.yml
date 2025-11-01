@@ -47,14 +47,6 @@ jobs:
           echo "ZIP_FILE=$OUTPUT" >> $GITHUB_ENV
           echo "TAG_NAME=jspl-core-v$ENV_DATE" >> $GITHUB_ENV
 
-      - name: Create Git Tag
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          
-          git tag "${{ env.TAG_NAME }}" -m "Recovered code from web.archive.org - Snapshot: 2025-08-01"
-          git push origin "${{ env.TAG_NAME }}"
-          echo "✅ Created and pushed tag: ${{ env.TAG_NAME }}"
 
       - name: Create Release
         env:

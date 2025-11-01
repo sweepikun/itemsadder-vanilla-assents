@@ -58,7 +58,7 @@ jobs:
 
       - name: Create Release
         env:
-          GITHUB_TOKEN: ${{ secrets.REPO_PAT }}  # 使用具有写权限的 PAT
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # 使用具有写权限的 PAT
         run: |
           gh release create "${{ env.TAG_NAME }}" \
             --title "Recovered: JSPL Core (Web Archive Snapshot)" \

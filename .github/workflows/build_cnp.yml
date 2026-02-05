@@ -41,7 +41,7 @@ jobs:
       - name: Find built JAR file
         id: find-jar
         run: |
-          JAR_FILE=$(find adyeshach-source -name "*.jar" \
+          JAR_FILE=$(find Custom-Nameplates -name "*.jar" \
             -not -name "*-sources.jar" \
             -not -name "*-javadoc.jar" \
             -not -name "*-dev.jar" \

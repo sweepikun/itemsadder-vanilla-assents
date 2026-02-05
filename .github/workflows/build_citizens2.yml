@@ -28,14 +28,15 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-
-      # 4️⃣ 构建
-      - name: Grant execute permission to gradlew
-        run: chmod +x Citizens2/gradlew
+          
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.5'
 
       - name: Build plugin
         working-directory: Citizens2
-        run: ./gradlew clean build
+        run: gradle clean build
 
       # 5️⃣ 找 JAR
       - name: Find built JAR file

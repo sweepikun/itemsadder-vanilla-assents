@@ -18,7 +18,7 @@ jobs:
           git clone https://github.com/CitizensDev/Citizens2.git
       - name: Set Git config to avoid git config command failure
         run: |
-          cd Custom-Nameplates
+          cd Citizens2
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
 
@@ -31,7 +31,7 @@ jobs:
 
       # 4️⃣ 构建
       - name: Grant execute permission to gradlew
-        run: chmod +x Custom-Nameplates/gradlew
+        run: chmod +x Citizens2/gradlew
 
       - name: Build plugin
         working-directory: Citizens2
@@ -63,7 +63,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: Custom-Nameplates
+          tag_name: Citizens2
           name: Citizens2 (Auto Build)
           body: "Built from https://github.com/CitizensDev/Citizens2.git"
           files: ${{ steps.find-jar.outputs.jar_path }}

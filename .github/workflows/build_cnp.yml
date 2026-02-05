@@ -16,6 +16,11 @@ jobs:
       - name: Clone repo
         run: |
           git clone https://github.com/Xiao-MoMi/Custom-Nameplates.git
+      - name: Set Git config to avoid git config command failure
+        run: |
+          cd Custom-Nameplates
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
 
       # 3️⃣ 设置 JDK 21（按你要求）
       - name: Set up JDK 21
